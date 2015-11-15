@@ -17,18 +17,14 @@
  */
 package edu.unh.iol.dlc;
 
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.HeadlessException;
+import org.sikuli.basics.Debug;
+
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Locale;
-
-import org.sikuli.basics.Debug;
 
 /**
  * The ConnectionController class manages all of the VNC connections as well
@@ -86,7 +82,7 @@ public class ConnectionController extends GraphicsEnvironment {
 	 */
 	public void openConnection(int index){
 		//since other security types are not yet supported
-		threads.get(index).openConnection(1, 1); 
+		threads.get(index).openConnection(1, 2);
 	}
 	
 	/**

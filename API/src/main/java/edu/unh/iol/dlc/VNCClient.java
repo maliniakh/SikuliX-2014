@@ -17,18 +17,30 @@
  */
 package edu.unh.iol.dlc;
 
+import org.sikuli.basics.Debug;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.DESKeySpec;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-
-import org.sikuli.basics.Debug;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 /**
  * The VNCClient class controls all of the messages between
@@ -178,7 +190,58 @@ public class VNCClient {
                  * resulting 16-byte response.
                  * The protocol continues with the SecurityResult message."
                  */
-                //securityResult();
+                try {
+                    String pwd = "secret";
+
+                    byte[] challenge = new byte[16];
+                    dataIn.read(challenge);
+
+
+                    //securityResult();
+
+                    if (pwd.length() > 8) {
+                        pwd = pwd.substring(0, 8);    // Truncate to 8 chars
+                    }
+
+                    // Truncate password on the first zero byte.
+                    int firstZero = pwd.indexOf(0);
+                    if (firstZero != -1) {
+                        pwd = pwd.substring(0, firstZero);
+                    }
+
+                    byte[] key = {0, 0, 0, 0, 0, 0, 0, 0};
+                    System.arraycopy(pwd.getBytes(), 0, key, 0, pwd.length());
+
+//                    DESKeySpec dks = new DESKeySpec(key);
+//                    SecretKeyFactory skf = SecretKeyFactory.getInstance("DES");
+//                    SecretKey desKey = skf.generateSecret(dks);
+//                    Cipher cipher = Cipher.getInstance("DES"); // DES/ECB/PKCS5Padding for SunJCE
+//
+//                    cipher.init(Cipher.ENCRYPT_MODE, desKey);
+//
+//                    CipherInputStream cis = new CipherInputStream(new ByteArrayInputStream(challenge), cipher);
+//                    doCopy(cis, dataOut);
+
+
+                    DesCipher des = new DesCipher(key);
+//
+                    des.encrypt(challenge, 0, challenge, 0);
+                    des.encrypt(challenge, 8, challenge, 8);
+
+                    dataOut.write(challenge);
+                    dataOut.flush();
+                    securityResult();
+//                } catch (NoSuchPaddingException e) {
+//                    e.printStackTrace();
+//                } catch (NoSuchAlgorithmException e) {
+//                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+//                } catch (InvalidKeyException e) {
+//                    e.printStackTrace();
+//                } catch (InvalidKeySpecException e) {
+                    e.printStackTrace();
+                }
                 break;
             default:
                 try{
@@ -191,6 +254,17 @@ public class VNCClient {
                 }
                 break;
         }
+    }
+
+    public static void doCopy(InputStream is, OutputStream os) throws IOException {
+        byte[] bytes = new byte[64];
+        int numBytes;
+        while ((numBytes = is.read(bytes)) != -1) {
+            os.write(bytes, 0, numBytes);
+        }
+        os.flush();
+//        os.close();
+//        is.close();
     }
 
     /**

@@ -6,13 +6,14 @@
  */
 package org.sikuli.basics;
 
+import org.sikuli.util.JythonHelper;
+
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import org.sikuli.util.JythonHelper;
 
 /**
  * Debug is a utility class that wraps println statements and allows more or less command line
@@ -74,7 +75,7 @@ public class Debug {
   static {
     String debug = System.getProperty("sikuli.Debug");
     if (debug != null && "".equals(debug)) {
-      DEBUG_LEVEL = 0;
+      DEBUG_LEVEL = 3;
       Settings.DebugLogs = false;
     } else {
       try {
